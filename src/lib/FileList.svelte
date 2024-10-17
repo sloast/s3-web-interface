@@ -9,12 +9,12 @@
         SERVICE_DATA_BUCKET,
         uploadDataFile,
     } from "./s3";
-    import Modal from "./Modal.svelte";
+    import Modal from "./modals/Modal.svelte";
     import download_svg from "../assets/download.svg";
     import delete_svg from "../assets/delete.svg";
     import { formatBytes } from "./utils";
-    import DeleteModal from "./DeleteModal.svelte";
-    import ConflictModal from "./ConflictModal.svelte";
+    import DeleteModal from "./modals/DeleteModal.svelte";
+    import ConflictModal from "./modals/ConflictModal.svelte";
 
     export let files: File_t[] = [];
     export let current_service: Service;

@@ -147,7 +147,7 @@ export const uploadScript = async (service: Service, script_file: File): Promise
     return key;
 }
 
-export async function getScriptFileMetadata(service: Service): Promise<File_t> {
+export async function getScriptFileMetadata(service: Service): Promise<File_t | null> {
     const bucket = SERVICE_SCRIPTS_BUCKET;
     const key = service.prefix;
 
@@ -169,6 +169,10 @@ export async function getScriptFileMetadata(service: Service): Promise<File_t> {
             name: `${service.title}.${SCRIPT_FILE_EXTENSION}`
         };
     } catch (err) {
+        if ((err as Error)?.name === "NotFound") {
+            return null;
+        }
+
         throw err;
     }
 }
@@ -202,6 +206,7 @@ export const listServices = async (): Promise<Service[]> => {
         });
         const objectData = await client.send(getObjectCommand);
         const bodyContents = await streamToString(objectData.Body);
+
         const services: Service[] = JSON.parse(bodyContents);
         for (const service of services) {
             service.date = new Date(service.date);
@@ -213,6 +218,22 @@ export const listServices = async (): Promise<Service[]> => {
         return [];
     }
 };
+
+export async function addService(service: Service): Promise<void> {
+    const services = await listServices();
+    if (services.some((s) => s.prefix === service.prefix)) {
+        throw 'Service already exists at this time'
+    }
+    services.push(service)
+    
+    const putObjectCommand = new PutObjectCommand({
+        Bucket: SERVICE_DATA_BUCKET,
+        Key: "services.json",
+        Body: JSON.stringify(services),
+        ContentType: "application/json",
+    });
+    await client.send(putObjectCommand);
+}
 
 function streamToString(stream: ReadableStream): Promise<string> {
     const reader = stream.getReader();

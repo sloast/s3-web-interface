@@ -78,16 +78,22 @@ const getStoredTokens = (): Tokens | null => {
 };
 
 const getClient = async (tokens: Tokens): Promise<S3Client> => {
+
+    const credentials = fromCognitoIdentityPool({
+        client: new CognitoIdentityClient({ region: REGION }),
+        identityPoolId: IDENTITY_POOL_ID,
+        logins: {
+            [`cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}`]:
+                tokens.id_token,
+        },
+    });
+
+    const test = await credentials();
+
+
     const client = new S3Client({
         region: REGION,
-        credentials: fromCognitoIdentityPool({
-            client: new CognitoIdentityClient({ region: REGION }),
-            identityPoolId: IDENTITY_POOL_ID,
-            logins: {
-                [`cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}`]:
-                    tokens.id_token,
-            },
-        }),
+        credentials,
     });
 
     return client;
@@ -108,7 +114,7 @@ export const signIn = async (): Promise<S3Client> => {
 
     if (tokens) {
         try {
-            return getClient(tokens);
+            return await getClient(tokens);
         } catch (error) {
             console.error("Error creating client:", error);
         }

@@ -8,10 +8,10 @@
     import { formatBytes } from "./utils";
     import download_svg from "../assets/download.svg";
     import delete_svg from "../assets/delete.svg";
-    import Modal from "./Modal.svelte";
+    import Modal from "./modals/Modal.svelte";
     import midyell_png from "../assets/midyell.png";
-    import ConflictModal from "./ConflictModal.svelte";
-    import DeleteModal from "./DeleteModal.svelte";
+    import ConflictModal from "./modals/ConflictModal.svelte";
+    import DeleteModal from "./modals/DeleteModal.svelte";
 
     export let current_service: Service;
     export let file: File_t | null = null;

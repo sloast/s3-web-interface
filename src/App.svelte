@@ -9,25 +9,27 @@
 
     import { onMount } from "svelte";
     import {
-        listObjects,
         setClient,
         listServices,
         getServiceFiles,
         getScriptFileMetadata,
+        addService,
     } from "./lib/s3";
 
-    import {
-        type Service,
-        newService,
-        nextService,
-        scriptFileMetadata,
-    } from "./lib/services";
+    import { type Service, newService, nextService } from "./lib/services";
     import type { File_t } from "./lib/types";
     import Uploader from "./lib/Uploader.svelte";
     import ScriptPanel from "./lib/ScriptPanel.svelte";
+    import NewServiceModal from "./lib/modals/NewServiceModal.svelte";
 
     let services: Service[] = [];
     let current_service: Service;
+
+    $: if (current_service) {
+        onSetService();
+    }
+
+    let newServiceModal: NewServiceModal;
 
     let data_files: File_t[];
     let script_file: File_t | null = null;
@@ -40,24 +42,27 @@
         services = await listServices();
         current_service = nextService(services);
         services = [...services];
-        onSetService();
     });
 
     async function onSetService(): Promise<void> {
-        data_files = await getServiceFiles(current_service);
         try {
+            data_files = await getServiceFiles(current_service);
             script_file = await getScriptFileMetadata(current_service);
         } catch (err) {
-            console.warn("no script", err);
+            console.warn("file load error", err);
             script_file = null;
         }
     }
 
     async function mkNewService() {
         const service = newService();
-        services = [service, ...services];
-        current_service = service;
-        onSetService();
+        try {
+            addService(service);
+            services = [service, ...services];
+            current_service = service;
+        } catch (err) {
+            console.error(err);
+        }
     }
 </script>
 
@@ -87,14 +92,18 @@
         </span>
 
         <button
-            on:click={mkNewService}
+            on:click={async () => {
+                const result = await newServiceModal.show();
+                if (result) {
+                    current_service = result;
+                }
+            }}
             class="border-2 p-3 rounded-lg border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200"
             >New Service</button
         >
 
         <select
             bind:value={current_service}
-            on:change={onSetService}
             name="pick"
             id="service-select"
             class="p-3 rounded-lg border-2 border-transparent focus:border-emerald-500 hover:border-emerald-500 bg-emerald-900 transition-all duration-200"
@@ -115,4 +124,6 @@
         <div class="border-r-4 border-slate-500/25 rounded-sm" />
         <ScriptPanel {current_service} file={script_file}></ScriptPanel>
     </div>
+
+    <NewServiceModal bind:this={newServiceModal} />
 </main>
