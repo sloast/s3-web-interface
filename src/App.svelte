@@ -5,22 +5,32 @@
     import Panel from "./lib/Panel.svelte";
     import { LOGIN_URL, signIn, signOut } from "./lib/auth";
 
+    import file_svg from "./assets/file.svg";
+
     import { onMount } from "svelte";
     import {
         listObjects,
         setClient,
         listServices,
         getServiceFiles,
+        getScriptFileMetadata,
     } from "./lib/s3";
 
-    import { type Service, newService, nextService } from "./lib/services";
+    import {
+        type Service,
+        newService,
+        nextService,
+        scriptFileMetadata,
+    } from "./lib/services";
     import type { File_t } from "./lib/types";
     import Uploader from "./lib/Uploader.svelte";
+    import ScriptPanel from "./lib/ScriptPanel.svelte";
 
     let services: Service[] = [];
     let current_service: Service;
 
     let data_files: File_t[];
+    let script_file: File_t | null = null;
 
     onMount(async () => {
         // Check if user is already signed in
@@ -35,6 +45,12 @@
 
     async function onSetService(): Promise<void> {
         data_files = await getServiceFiles(current_service);
+        try {
+            script_file = await getScriptFileMetadata(current_service);
+        } catch (err) {
+            console.warn("no script", err);
+            script_file = null;
+        }
     }
 
     async function mkNewService() {
@@ -61,16 +77,20 @@
         <span class="text-slate-400 font-semibold">
             <a
                 href={LOGIN_URL}
-                class="border-2 p-3 rounded-l-lg inline-block border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200"
+                class="border-2 p-3 rounded-l-lg border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200 inline-block"
                 >change uer</a
             ><button
                 on:click={signOut}
-                class="border-2 p-3 rounded-r-lg border-l-0 border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200"
+                class="border-2 p-3 rounded-r-lg border-rose-800 hover:bg-rose-500 hover:text-black transition-all duration-200"
                 >logout</button
             >
         </span>
 
-        <button on:click={mkNewService}>New Service</button>
+        <button
+            on:click={mkNewService}
+            class="border-2 p-3 rounded-lg border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200"
+            >New Service</button
+        >
 
         <select
             bind:value={current_service}
@@ -93,9 +113,6 @@
             <FileList files={data_files} {current_service}></FileList></Panel
         >
         <div class="border-r-4 border-slate-500/25 rounded-sm" />
-        <Panel>
-            <h1>Script</h1>
-            <Uploader upload_function={async (file)=>{}}></Uploader>
-        </Panel>
+        <ScriptPanel {current_service} file={script_file}></ScriptPanel>
     </div>
 </main>

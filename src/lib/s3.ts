@@ -3,16 +3,19 @@ import {
     ListObjectsCommand,
     GetObjectCommand,
     PutObjectCommand,
+    DeleteObjectCommand,
     type S3Client,
+    HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 
 import { type Service } from "./services";
-import type { File_t } from "./types";
+import { SCRIPT_FILE_EXTENSION, type File_t } from "./types";
 
 let client: S3Client;
 
 export const SERVICE_DATA_BUCKET = "atm-service-data"
 export const SERVICE_SCRIPTS_BUCKET = "atm-service-scripts"
+
 
 export function setClient(client_: S3Client) {
     client = client_;
@@ -64,6 +67,54 @@ export const getServiceFiles = async (service: Service): Promise<File_t[]> => {
     }
 };
 
+export const getObject = async (bucket: string, key: string): Promise<Blob> => {
+    const getObjectCommand = new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+    });
+    const objectData = await client.send(getObjectCommand);
+    const body = objectData.Body;
+
+    if (!body) {
+        throw new Error("No body in the response");
+    }
+
+    const response = new Response(objectData.Body);
+    return await response.blob();
+}
+
+export const downloadFile = async (bucket: string, key: string, filename: string): Promise<void> => {
+    try {
+        const blob = await getObject(bucket, key);
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error("Error downloading file:", err);
+    }
+}
+
+export const deleteFile = async (bucket: string, key: string): Promise<void> => {
+    try {
+        const deleteObjectCommand = new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: key,
+        });
+        await client.send(deleteObjectCommand);
+        console.log(`File deleted successfully from ${bucket}/${key}`);
+    } catch (err) {
+        console.error("Error deleting file:", err);
+    }
+}
+
+
 export const uploadFile = async (bucket: string, key: string, file: File): Promise<void> => {
     const arrayBuffer = await file.arrayBuffer();
     const putObjectCommand = new PutObjectCommand({
@@ -81,16 +132,45 @@ export const uploadFile = async (bucket: string, key: string, file: File): Promi
     }
 }
 
-export const uploadDataFile = async (service: Service, file: File): Promise<void> => {
+export const uploadDataFile = async (service: Service, file: File, filename?: string): Promise<string> => {
+    const filename_ = filename ?? file.name
     const bucket = SERVICE_DATA_BUCKET;
-    const key = `${service.prefix}/${file.name}`
+    const key = `${service.prefix}/${filename_}`
     await uploadFile(bucket, key, file)
+    return key;
 }
 
-export const uploadScript = async (service: Service, script_file: File): Promise<void> => {
+export const uploadScript = async (service: Service, script_file: File): Promise<string> => {
     const bucket = SERVICE_SCRIPTS_BUCKET;
-    const key = `${service.prefix}.${script_file.name.replace(/^.*\./, '') || 'msx7'}`;
+    const key = service.prefix;
     await uploadFile(bucket, key, script_file);
+    return key;
+}
+
+export async function getScriptFileMetadata(service: Service): Promise<File_t> {
+    const bucket = SERVICE_SCRIPTS_BUCKET;
+    const key = service.prefix;
+
+    try {
+        const headObjectCommand = new HeadObjectCommand({
+            Bucket: bucket,
+            Key: key,
+        });
+        const objectData = await client.send(headObjectCommand);
+
+        if (!objectData.LastModified || !objectData.ContentLength) {
+            throw new Error("Incomplete metadata");
+        }
+
+        return {
+            key: key,
+            lastModified: objectData.LastModified,
+            size: objectData.ContentLength,
+            name: `${service.title}.${SCRIPT_FILE_EXTENSION}`
+        };
+    } catch (err) {
+        throw err;
+    }
 }
 
 

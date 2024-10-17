@@ -12,12 +12,24 @@
 
     function setupDragListeners(
         elem: EventTarget,
-        cb: (dragging: boolean) => void,
+        f: (dragging: boolean) => void,
     ) {
-        elem.addEventListener("dragenter", () => cb(true));
-        elem.addEventListener("dragleave", () => cb(false));
-        elem.addEventListener("dragover", () => cb(true));
-        elem.addEventListener("drop", () => cb(false));
+        const cb = (event: Event, dragging: boolean) => {
+            const dragEvent = event as DragEvent;
+            if (
+                dragEvent.dataTransfer?.items &&
+                Array.from(dragEvent.dataTransfer.items).some(
+                    (item) => item.kind === "file",
+                ) &&
+                (multiple || dragEvent.dataTransfer.items.length === 1)
+            ) {
+                f(dragging);
+            }
+        };
+        elem.addEventListener("dragenter", (event: Event) => cb(event, true));
+        elem.addEventListener("dragleave", (event: Event) => cb(event, false));
+        elem.addEventListener("dragover", (event: Event) => cb(event, true));
+        elem.addEventListener("drop", (event: Event) => cb(event, false));
     }
 
     setupDragListeners(window, (v) => {
@@ -26,6 +38,9 @@
 
     async function handleDrop(event: DragEvent) {
         const files = event.dataTransfer?.files;
+        if (!multiple && (files?.length??0) > 1) {
+            return;
+        }
         if (files) {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
@@ -57,7 +72,7 @@
 </script>
 
 <div
-    class="ants flex-auto flex m-2 justify-center items-center p-4 transition-all"
+    class="ants flex-auto flex justify-center items-center p-4 transition-all"
     on:dragover|preventDefault
     on:drop|preventDefault={handleDrop}
     on:click={() => fileInput.click()}
@@ -78,7 +93,7 @@
         hidden
         on:change={handleFileUpload}
     />
-    Drag {multiple ? "files" : "a file"} here to upload...
+    Drag {multiple ? "files" : "script"} here to upload...
 </div>
 
 <style>
@@ -105,7 +120,7 @@
             linear-gradient(180deg, #569491 50%, transparent 50%),
             linear-gradient(180deg, #569491 50%, transparent 50%);
         background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-        border-radius: 2px;
+        border-radius: 3px;
         background-size:
             25px 3px,
             25px 3px,
@@ -128,11 +143,8 @@
         animation-play-state: running;
     }
 
-    .highlight, .ants:hover {
+    .highlight,
+    .ants:hover {
         @apply bg-slate-400/20;
-    }
-
-    .dragging:hover {
-        @apply m-16
     }
 </style>

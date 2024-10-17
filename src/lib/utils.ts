@@ -1,0 +1,1 @@
+export function formatBytes(bytes: number, decimals = 2) { if (!+bytes) return "0 Bytes"; const c = 0 > decimals ? 0 : decimals, d = Math.floor(Math.log(bytes) / Math.log(1024)); return `${parseFloat((bytes / Math.pow(1024, d)).toFixed(c))} ${["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][d]}` }
