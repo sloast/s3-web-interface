@@ -9,7 +9,7 @@ const USER_POOL_ID = "eu-west-2_NraDuQCHk";
 const APP_CLIENT_ID = "4kkranljmsf28lb2i0laaaip78";
 const IDENTITY_POOL_ID = "eu-west-2:86e8cec3-3e3a-44b2-b4e1-b97200fefe7a";
 
-const CURRENT_URL = window.location.origin; // + window.location.pathname);
+const CURRENT_URL = window.location.origin + window.location.pathname;
 
 const BASE_LOGIN_URL =
     "https://atm-users.auth.eu-west-2.amazoncognito.com/login";
