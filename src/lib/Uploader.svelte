@@ -38,7 +38,7 @@
 
     async function handleDrop(event: DragEvent) {
         const files = event.dataTransfer?.files;
-        if (!multiple && (files?.length??0) > 1) {
+        if (!multiple && (files?.length ?? 0) > 1) {
             return;
         }
         if (files) {

@@ -26,12 +26,12 @@
         </h2>
         <div class="flex flex-row justify-between">
             <button
-                class="p-2 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
+                class="p-2 border-2 border-blue-500 hover:bg-blue-500 hover:text-black rounded"
                 on:click={() => handleResponse(null)}>Cancel</button
             >
             <button
-                class="p-2 border-2 border-rose-500 hover:bg-rose-500 hover:text-black rounded"
-                on:click={() => handleResponse(null)}>Delete</button
+                class="p-2 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
+                on:click={() => handleResponse(null)}>Create</button
             >
         </div>
     </Modal>

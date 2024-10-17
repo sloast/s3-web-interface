@@ -1,17 +1,18 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import Panel from "./Panel.svelte";
-    import { deleteFile, downloadFile, SERVICE_SCRIPTS_BUCKET, uploadScript } from "./s3";
-    import { scriptFileMetadata, type Service } from "./services";
+    import {
+        deleteFile,
+        downloadFile,
+        SERVICE_SCRIPTS_BUCKET,
+        uploadScript,
+    } from "./s3";
+    import { type Service } from "./services";
     import { fileToFile_t, SCRIPT_FILE_EXTENSION, type File_t } from "./types";
     import Uploader from "./Uploader.svelte";
-    import { formatBytes } from "./utils";
-    import download_svg from "../assets/download.svg";
-    import delete_svg from "../assets/delete.svg";
-    import Modal from "./modals/Modal.svelte";
-    import midyell_png from "../assets/midyell.png";
     import ConflictModal from "./modals/ConflictModal.svelte";
     import DeleteModal from "./modals/DeleteModal.svelte";
+    import FileView from "./FileView.svelte";
+    import CustomModal from "./modals/CustomModal.svelte";
 
     export let current_service: Service;
     export let file: File_t | null = null;
@@ -19,8 +20,16 @@
     async function upload_file(f: File) {
         const file_name = `${current_service.title}.${SCRIPT_FILE_EXTENSION}`;
 
+        const supplied_file_extension = f.name.split(".").pop();
+        if (supplied_file_extension != SCRIPT_FILE_EXTENSION) {
+            wrongFileExtensionModal.show({
+                extension: supplied_file_extension,
+            });
+            return;
+        }
+
         if (file) {
-            const {cont} = await conflictModal.show(file_name);
+            const { cont } = await conflictModal.show(file_name);
 
             if (!cont) {
                 return;
@@ -42,6 +51,7 @@
 
     let deleteModal: DeleteModal;
     let conflictModal: ConflictModal;
+    let wrongFileExtensionModal: CustomModal;
 </script>
 
 <Panel>
@@ -50,55 +60,16 @@
         class="flex-initial bg-emerald-800/50 rounded-lg border-2 border-emerald-500"
     >
         {#if file !== null}
-            <div
-                class="flex-none flex flex-row justify-stretch items-center gap-2 p-2 bg-white/10 rounded shadow"
-            >
-                <img class="w-8 h-8" src={midyell_png} />
-                <div class="font-semibold text-lg">{file.name}</div>
-                {#if file.error}
-                    <div class="text-center grow text-lg text-rose-400">
-                        Error
-                    </div>
-                {:else if file.uploading}
-                    <div class="text-center grow text-lg text-emerald-300">
-                        Uploading...
-                    </div>
-                {:else}
-                    <div class="flex-1">
-                        <div class="text-sm text-gray-500">
-                            {file.lastModified.toLocaleString()}
-                        </div>
-                        <div class="text-sm text-gray-500">
-                            {formatBytes(file.size, 2)}
-                        </div>
-                    </div>
-                    <button
-                        on:click={() =>
-                            downloadFile(
-                                SERVICE_SCRIPTS_BUCKET,
-                                file.key,
-                                file.name,
-                            )}
-                        class="border-emerald-500 border-2 text-white p-1 rounded hover:bg-emerald-600 transition-all"
-                    >
-                        <img
-                            src={download_svg}
-                            alt="Download"
-                            class="h-6 w-6"
-                        />
-                    </button>
-                    <button
-                        on:click={async () => {
-                            if (!(await deleteModal.show(file.name))) return;
-                            await deleteFile(SERVICE_SCRIPTS_BUCKET, file.key);
-                            file = null;
-                        }}
-                        class="border-rose-500 border-2 text-white p-1 rounded hover:bg-rose-600 transition-all"
-                    >
-                        <img src={delete_svg} alt="Download" class="h-6 w-6" />
-                    </button>
-                {/if}
-            </div>
+            <FileView
+                {file}
+                onDownload={(file) =>
+                    downloadFile(SERVICE_SCRIPTS_BUCKET, file.key, file.name)}
+                onDelete={async (f) => {
+                    if (!(await deleteModal.show(f.name))) return;
+                    await deleteFile(SERVICE_SCRIPTS_BUCKET, f.key);
+                    file = null;
+                }}
+            />
         {:else}
             <div
                 class="border-2 border-dashed border-slate-400 p-4 text-center text-slate-300 m-2"
@@ -107,8 +78,27 @@
             </div>
         {/if}
     </div>
-    <Uploader upload_function={upload_file}></Uploader>
+    <Uploader upload_function={upload_file} />
 </Panel>
 
-<ConflictModal bind:this={conflictModal}></ConflictModal>
-<DeleteModal bind:this={deleteModal}></DeleteModal>
+<ConflictModal bind:this={conflictModal} />
+<DeleteModal bind:this={deleteModal} />
+<CustomModal bind:this={wrongFileExtensionModal}>
+    <h2 class="text-xl">
+        Invalid file extension <span class="font-bold text-rose-400"
+            >.{wrongFileExtensionModal.state().extension}</span
+        >
+        <br />
+    </h2>
+    <h3 class="text-l">
+        Expected <span class="font-bold text-emerald-400"
+            >.{SCRIPT_FILE_EXTENSION}</span
+        >
+    </h3>
+    <div class="flex flex-row justify-end">
+        <button
+            class="p-2 px-4 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
+            on:click={wrongFileExtensionModal.close}>sorry</button
+        >
+    </div>
+</CustomModal>
