@@ -53,7 +53,6 @@
         const service = await newServiceModal.show();
         if (!service) return;
         try {
-            addService(service);
             services = [service, ...services];
             current_service = service;
         } catch (err) {

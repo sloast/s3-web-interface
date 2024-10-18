@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { addService } from "../s3";
     import { newService, type Service } from "../services";
     import CustomModal from "./CustomModal.svelte";
 
@@ -8,14 +9,16 @@
 
     const nextSunday: Service = newService();
 
-    let service: Service = nextSunday
+    let service: Service = nextSunday;
+    let error: string | undefined;
 
     let dateInput: HTMLInputElement;
     let timeInput: HTMLInputElement;
     let titleInput: HTMLInputElement;
 
     export async function show(): Promise<Service | undefined> {
-        service = nextSunday
+        service = nextSunday;
+        error = undefined;
 
         const result = await modal.show();
         return result;
@@ -31,6 +34,17 @@
 
     function onTitleChanged() {
         service.title = titleInput.value;
+    }
+
+    async function submit() {
+        error = undefined;
+        try {
+            await addService(service);
+
+            modal.close(service);
+        } catch (err) {
+            error = err?.toString?.();
+        }
     }
 </script>
 
@@ -74,18 +88,22 @@
         />
     </div>
 
+    {#if error}
+        <div class="font-bold text-rose-400">
+            {error}
+        </div>
+    {/if}
+
     <div class="flex flex-row justify-between gap-8">
         <button
             class="p-2 px-4 border-2 border-blue-500 hover:bg-blue-500 hover:text-black rounded"
             on:click={() => {
-                modal.close(undefined);
+                modal.close();
             }}>Cancel</button
         >
         <button
             class="p-2 px-4 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
-            on:click={() => {
-                modal.close(service);
-            }}>Submit</button
+            on:click={submit}>Submit</button
         >
     </div>
 </CustomModal>
