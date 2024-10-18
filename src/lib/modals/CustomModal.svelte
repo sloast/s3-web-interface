@@ -1,19 +1,19 @@
-<script lang="ts">
+<script lang="ts" generics="State extends {}, Result">
     import Modal from "./Modal.svelte";
 
     let isShown = false;
-    let state_: object = {};
-    let completePromise: (value: any) => void;
+    let state_: State;
+    let completePromise: (value?: Result) => void;
 
-    export function show(initialState?: object): Promise<any> {
+    export function show(initialState?: State): Promise<Result | undefined> {
+        state_ = initialState ?? {} as State;
         isShown = true;
-        state_ = initialState ?? {};
         return new Promise((resolve) => {
             completePromise = resolve;
         });
     }
 
-    export function state(updates?: object): any {
+    export function state(updates?: Partial<State>): State {
         if (updates) {
             state_ = { ...state_, ...updates };
         }
@@ -21,7 +21,7 @@
         return state_;
     }
 
-    export function close(result?: any) {
+    export function close(result?: Result) {
         isShown = false;
         completePromise(result);
     }

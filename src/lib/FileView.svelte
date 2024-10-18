@@ -37,11 +37,11 @@
             Uploading...
         </div>
     {:else}
-        <div class="flex-1">
-            <div class="text-sm text-gray-500">
+        <div class="flex-1 text-slate-400/80">
+            <div class="text-sm">
                 {file.lastModified.toLocaleString()}
             </div>
-            <div class="text-sm text-gray-500">
+            <div class="text-sm">
                 {formatBytes(file.size, 2)}
             </div>
         </div>

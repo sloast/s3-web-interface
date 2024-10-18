@@ -20,8 +20,8 @@
     async function upload_file(f: File) {
         const file_name = `${current_service.title}.${SCRIPT_FILE_EXTENSION}`;
 
-        const supplied_file_extension = f.name.split(".").pop();
-        if (supplied_file_extension != SCRIPT_FILE_EXTENSION) {
+        const supplied_file_extension = f.name.split(".").pop() ?? "";
+        if (supplied_file_extension !== SCRIPT_FILE_EXTENSION) {
             wrongFileExtensionModal.show({
                 extension: supplied_file_extension,
             });
@@ -51,7 +51,9 @@
 
     let deleteModal: DeleteModal;
     let conflictModal: ConflictModal;
-    let wrongFileExtensionModal: CustomModal;
+    let wrongFileExtensionModal: CustomModal<{ extension: string }, void>;
+    let wrongFileExtensionModal_t: any;
+    $: wrongFileExtensionModal = wrongFileExtensionModal_t;
 </script>
 
 <Panel>
@@ -83,22 +85,23 @@
 
 <ConflictModal bind:this={conflictModal} />
 <DeleteModal bind:this={deleteModal} />
-<CustomModal bind:this={wrongFileExtensionModal}>
+<CustomModal bind:this={wrongFileExtensionModal_t}>
     <h2 class="text-xl">
         Invalid file extension <span class="font-bold text-rose-400"
             >.{wrongFileExtensionModal.state().extension}</span
         >
         <br />
+        <span class="text-base">
+            Expected <span class="font-bold text-emerald-400"
+                >.{SCRIPT_FILE_EXTENSION}</span
+            >
+        </span>
     </h2>
-    <h3 class="text-l">
-        Expected <span class="font-bold text-emerald-400"
-            >.{SCRIPT_FILE_EXTENSION}</span
-        >
-    </h3>
+
     <div class="flex flex-row justify-end">
         <button
             class="p-2 px-4 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
-            on:click={wrongFileExtensionModal.close}>sorry</button
+            on:click={() => wrongFileExtensionModal.close()}>sorry</button
         >
     </div>
 </CustomModal>

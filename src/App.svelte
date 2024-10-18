@@ -1,11 +1,7 @@
 <script lang="ts">
-    import { S3Client } from "@aws-sdk/client-s3";
-
     import FileList from "./lib/FileList.svelte";
     import Panel from "./lib/Panel.svelte";
     import { LOGIN_URL, signIn, signOut } from "./lib/auth";
-
-    import file_svg from "./assets/file.svg";
 
     import { onMount } from "svelte";
     import {
@@ -18,7 +14,6 @@
 
     import { type Service, newService, nextService } from "./lib/services";
     import type { File_t } from "./lib/types";
-    import Uploader from "./lib/Uploader.svelte";
     import ScriptPanel from "./lib/ScriptPanel.svelte";
     import NewServiceModal from "./lib/modals/NewServiceModal.svelte";
 
@@ -55,7 +50,8 @@
     }
 
     async function mkNewService() {
-        const service = newService();
+        const service = await newServiceModal.show();
+        if (!service) return;
         try {
             addService(service);
             services = [service, ...services];
@@ -79,25 +75,20 @@
             >
         </h1>
         <div class="grow"></div>
-        <span class="text-slate-400 font-semibold">
+        <span class="text-slate-300 font-semibold">
             <a
                 href={LOGIN_URL}
                 class="border-2 p-3 rounded-l-lg border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200 inline-block"
-                >change uer</a
+                >Switch User</a
             ><button
                 on:click={signOut}
                 class="border-2 p-3 rounded-r-lg border-rose-800 hover:bg-rose-500 hover:text-black transition-all duration-200"
-                >logout</button
+                >Logout</button
             >
         </span>
 
         <button
-            on:click={async () => {
-                const result = await newServiceModal.show();
-                if (result) {
-                    current_service = result;
-                }
-            }}
+            on:click={mkNewService}
             class="border-2 p-3 rounded-lg border-emerald-800 hover:bg-emerald-500 hover:text-black transition-all duration-200"
             >New Service</button
         >

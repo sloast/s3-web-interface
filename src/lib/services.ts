@@ -6,7 +6,7 @@ export interface Service {
     title: string;
 }
 
-const SERVICE_TITLE_FORMAT = new Intl.DateTimeFormat("en-GB", {
+export const SERVICE_TITLE_FORMAT = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     year: "numeric",
     month: "long",

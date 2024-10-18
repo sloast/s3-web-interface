@@ -1,38 +1,91 @@
 <script lang="ts">
-    import type { Service } from "../services";
-    import Modal from "./Modal.svelte";
+    import { newService, type Service } from "../services";
+    import CustomModal from "./CustomModal.svelte";
 
-    let isShown = false;
-    let fileName: string = "filename";
-    let completePromise: (value: Service | null) => void;
+    let modal: CustomModal<{}, Service>;
+    let t_modal: any;
+    $: modal = t_modal;
 
-    export function show(): Promise<Service | null> {
-        isShown = true;
-        return new Promise((resolve) => {
-            completePromise = resolve;
-        });
+    const nextSunday: Service = newService();
+
+    let service: Service = nextSunday
+
+    let dateInput: HTMLInputElement;
+    let timeInput: HTMLInputElement;
+    let titleInput: HTMLInputElement;
+
+    export async function show(): Promise<Service | undefined> {
+        service = nextSunday
+
+        const result = await modal.show();
+        return result;
     }
 
-    function handleResponse(response: Service | null) {
-        isShown = false;
-        completePromise(response);
+    function onDateChanged() {
+        const date = new Date(dateInput.value);
+        const [hours, minutes] = timeInput.value.split(":").map(Number);
+        date.setUTCHours(hours, minutes);
+
+        service = newService(date);
+    }
+
+    function onTitleChanged() {
+        service.title = titleInput.value;
     }
 </script>
 
-{#if isShown}
-    <Modal>
-        <h2 class="text-xl">
-            Create new service
-        </h2>
-        <div class="flex flex-row justify-between">
-            <button
-                class="p-2 border-2 border-blue-500 hover:bg-blue-500 hover:text-black rounded"
-                on:click={() => handleResponse(null)}>Cancel</button
-            >
-            <button
-                class="p-2 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
-                on:click={() => handleResponse(null)}>Create</button
-            >
-        </div>
-    </Modal>
-{/if}
+<CustomModal bind:this={t_modal}>
+    <h2 class="text-xl">
+        New Service
+        <br />
+    </h2>
+
+    <div class="flex flex-row justify-start items-center gap-2">
+        Date:
+        <input
+            type="date"
+            value={nextSunday.date.toISOString().split("T")[0]}
+            bind:this={dateInput}
+            on:change={onDateChanged}
+            class="rounded p-2 bg-emerald-700/25 border-b-2 border-emerald-500"
+        />
+        <span> at </span>
+        <input
+            type="time"
+            value={nextSunday.date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: "UTC",
+            })}
+            bind:this={timeInput}
+            on:change={onDateChanged}
+            class="rounded p-2 bg-emerald-700/25 border-b-2 border-emerald-500"
+        />
+    </div>
+
+    <div class="flex flex-row justify-stretch items-center gap-4 w-96">
+        Title:
+        <input
+            type="text"
+            value={service.title}
+            bind:this={titleInput}
+            on:change={onTitleChanged}
+            class="grow rounded p-2 bg-emerald-700/25 border-b-2 border-emerald-500"
+        />
+    </div>
+
+    <div class="flex flex-row justify-between gap-8">
+        <button
+            class="p-2 px-4 border-2 border-blue-500 hover:bg-blue-500 hover:text-black rounded"
+            on:click={() => {
+                modal.close(undefined);
+            }}>Cancel</button
+        >
+        <button
+            class="p-2 px-4 border-2 border-emerald-500 hover:bg-emerald-500 hover:text-black rounded"
+            on:click={() => {
+                modal.close(service);
+            }}>Submit</button
+        >
+    </div>
+</CustomModal>

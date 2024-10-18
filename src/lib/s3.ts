@@ -231,6 +231,7 @@ export async function addService(service: Service): Promise<void> {
         Key: "services.json",
         Body: JSON.stringify(services),
         ContentType: "application/json",
+        CacheControl: 'no-cache'
     });
     await client.send(putObjectCommand);
 }
