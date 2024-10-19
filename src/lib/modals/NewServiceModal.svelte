@@ -85,6 +85,8 @@
             bind:this={titleInput}
             on:change={onTitleChanged}
             class="grow rounded p-2 bg-emerald-700/25 border-b-2 border-emerald-500"
+            on:keypress={(ev) =>
+                ev.key === "Enter" ? submit() : null}
         />
     </div>
 

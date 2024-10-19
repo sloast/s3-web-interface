@@ -49,8 +49,12 @@ export function newService(date?: Date): Service {
     };
 }
 
+const HOUR = 60 * 60 * 1000;
+
 export function nextService(services: Service[]): Service {
-    const now = new Date();
+    // 2h before current time
+    const now = new Date(Date.now() - 2 * HOUR);
+
     const upcomingServices = services.filter(
         (service) => service.date > now,
     );

@@ -127,8 +127,5 @@ export const signIn = async (): Promise<S3Client> => {
 };
 
 export const signOut = async (): Promise<void> => {
-    localStorage.removeItem("id_token");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
     window.location.href = LOGIN_URL;
 };

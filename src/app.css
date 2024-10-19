@@ -25,10 +25,6 @@ body {
   padding: 0;
 }
 
-h1 {
-  @apply text-4xl font-semibold
-}
-
 button {
   @apply transition-all
 }

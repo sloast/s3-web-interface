@@ -57,7 +57,7 @@
 </script>
 
 <Panel>
-    <h1>Script</h1>
+    <h1 class="text-4xl font-semibold">Script</h1>
     <div
         class="flex-initial bg-emerald-800/50 rounded-lg border-2 border-emerald-500"
     >

@@ -2,7 +2,7 @@
     import Modal from "./Modal.svelte";
 
     let isShown = false;
-    let state_: State;
+    export let state_: State = {} as State;
     let completePromise: (value?: Result) => void;
 
     export function show(initialState?: State): Promise<Result | undefined> {
@@ -27,6 +27,7 @@
     }
 </script>
 
+<svelte:options accessors/>
 {#if isShown}
     <Modal>
         <slot />

@@ -236,6 +236,27 @@ export async function addService(service: Service): Promise<void> {
     await client.send(putObjectCommand);
 }
 
+export async function deleteService(service: Service): Promise<void> {
+    const services = await listServices();
+    const updatedServices = services.filter((s) => s.prefix !== service.prefix);
+
+    const putObjectCommand = new PutObjectCommand({
+        Bucket: SERVICE_DATA_BUCKET,
+        Key: "services.json",
+        Body: JSON.stringify(updatedServices),
+        ContentType: "application/json",
+        CacheControl: 'no-cache'
+    });
+    await client.send(putObjectCommand);
+
+    await deleteFile(SERVICE_SCRIPTS_BUCKET, service.prefix);
+
+    const serviceFiles = await getServiceFiles(service);
+    for (const file of serviceFiles) {
+        await deleteFile(SERVICE_DATA_BUCKET, file.key);
+    }
+}
+
 function streamToString(stream: ReadableStream): Promise<string> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
