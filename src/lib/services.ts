@@ -1,10 +1,5 @@
-import type { File_t } from "./types";
-
-export interface Service {
-    prefix: string;
-    date: Date;
-    title: string;
-}
+import { addService } from "./s3";
+import type { File_t, Service } from "./types";
 
 export const SERVICE_TITLE_FORMAT = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
@@ -60,6 +55,7 @@ export function nextService(services: Service[]): Service {
     );
     if (upcomingServices.length === 0) {
         const service = newService();
+        addService(service)
         services.push(service)
         return service;
     }

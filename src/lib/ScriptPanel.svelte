@@ -6,8 +6,12 @@
         SERVICE_SCRIPTS_BUCKET,
         uploadScript,
     } from "./s3";
-    import { type Service } from "./services";
-    import { fileToFile_t, SCRIPT_FILE_EXTENSION, type File_t } from "./types";
+    import {
+        fileToFile_t,
+        SCRIPT_FILE_EXTENSION,
+        type File_t,
+        type Service,
+    } from "./types";
     import Uploader from "./Uploader.svelte";
     import ConflictModal from "./modals/ConflictModal.svelte";
     import DeleteModal from "./modals/DeleteModal.svelte";

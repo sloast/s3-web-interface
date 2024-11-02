@@ -8,8 +8,7 @@ import {
     HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 
-import { type Service } from "./services";
-import { SCRIPT_FILE_EXTENSION, type File_t } from "./types";
+import { SCRIPT_FILE_EXTENSION, type File_t,type Service } from "./types";
 
 let client: S3Client;
 

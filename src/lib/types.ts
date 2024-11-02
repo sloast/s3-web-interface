@@ -17,3 +17,9 @@ export function fileToFile_t(file: File, key: string, filename?: string): File_t
 }
 
 export const SCRIPT_FILE_EXTENSION = "sc7x"
+
+export interface Service {
+    prefix: string;
+    date: Date;
+    title: string;
+}

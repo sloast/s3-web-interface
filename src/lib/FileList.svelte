@@ -1,7 +1,5 @@
 <script lang="ts">
-    import type { Service } from "./services";
-    import { fileToFile_t, type File_t } from "./types";
-    import { getIcon } from "material-file-icons";
+    import { fileToFile_t, type File_t, type Service } from "./types";
     import Uploader from "./Uploader.svelte";
     import {
         deleteFile,

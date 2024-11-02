@@ -1,6 +1,7 @@
 <script lang="ts">
     import { addService } from "../s3";
-    import { newService, type Service } from "../services";
+    import { newService } from "../services";
+    import { type Service } from "../types";
     import CustomModal from "./CustomModal.svelte";
 
     let modal: CustomModal<{}, Service>;
@@ -85,8 +86,7 @@
             bind:this={titleInput}
             on:change={onTitleChanged}
             class="grow rounded p-2 bg-emerald-700/25 border-b-2 border-emerald-500"
-            on:keypress={(ev) =>
-                ev.key === "Enter" ? submit() : null}
+            on:keypress={(ev) => (ev.key === "Enter" ? submit() : null)}
         />
     </div>
 

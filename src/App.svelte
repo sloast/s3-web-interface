@@ -9,12 +9,11 @@
         listServices,
         getServiceFiles,
         getScriptFileMetadata,
-        addService,
         deleteService,
     } from "./lib/s3";
 
-    import { type Service, newService, nextService } from "./lib/services";
-    import type { File_t } from "./lib/types";
+    import { nextService } from "./lib/services";
+    import type { File_t, Service } from "./lib/types";
     import ScriptPanel from "./lib/ScriptPanel.svelte";
     import NewServiceModal from "./lib/modals/NewServiceModal.svelte";
     import CustomModal from "./lib/modals/CustomModal.svelte";
