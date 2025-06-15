@@ -23,13 +23,15 @@
     class="flex-none flex flex-row justify-stretch items-center gap-2 p-2 bg-white/10 rounded shadow"
 >
     {#if file.name.endsWith(SCRIPT_FILE_EXTENSION)}
-        <img class="h-8 w-8" src={midyell_png} alt="ms7 icon" />
+        <img class="h-8 w-8 shrink-0" src={midyell_png} alt="ms7 icon" />
     {:else}
-        <div class="h-8">
+        <div class="h-8 w-8 shrink-0">
             {@html getIcon(file.name).svg}
         </div>
     {/if}
-    <div class="font-semibold text-lg">{file.name}</div>
+    <div class="font-semibold text-lg basis-1/4 flex-1 text-left">
+        {file.name}
+    </div>
     {#if file.error}
         <div class="text-center grow text-lg text-rose-400">Error</div>
     {:else if file.uploading}
@@ -37,23 +39,25 @@
             Uploading...
         </div>
     {:else}
-        <div class="flex-1 text-slate-400/80">
-            <div class="text-sm">
+        <div class="flex-1 text-slate-400/80 px-1">
+            <span class="text-sm">
                 {file.lastModified.toLocaleString()}
-            </div>
-            <div class="text-sm">
+            </span>
+        </div>
+        <div class="flex-1 text-slate-400/80 px-1">
+            <span class="text-sm">
                 {formatBytes(file.size, 2)}
-            </div>
+            </span>
         </div>
         <button
             on:click={handleDownload}
-            class="border-emerald-500 border-2 text-white p-1 rounded hover:bg-emerald-600 transition-all"
+            class="border-emerald-500 border-2 text-white p-1 rounded hover:bg-emerald-600 transition-all shrink-0"
         >
             <img src={download_svg} alt="Download" class="h-6 w-6" />
         </button>
         <button
             on:click={handleDelete}
-            class="border-rose-500 border-2 text-white p-1 rounded hover:bg-rose-600 transition-all"
+            class="border-rose-500 border-2 text-white p-1 rounded hover:bg-rose-600 transition-all shrink-0"
         >
             <img src={delete_svg} alt="Download" class="h-6 w-6" />
         </button>
