@@ -7,8 +7,9 @@ import {
     type S3Client,
     HeadObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import { SCRIPT_FILE_EXTENSION, type File_t,type Service } from "./types";
+import { SCRIPT_FILE_EXTENSION, type File_t, type Service } from "./types";
 
 let client: S3Client;
 
@@ -84,13 +85,11 @@ export const getObject = async (bucket: string, key: string): Promise<Blob> => {
 
 export const downloadFile = async (bucket: string, key: string, filename: string): Promise<void> => {
     try {
-        const blob = await getObject(bucket, key);
 
-        const url = URL.createObjectURL(blob);
+        const url = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: `attachment;filename=${filename}` }))
 
         const a = document.createElement("a");
         a.href = url;
-        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -224,7 +223,7 @@ export async function addService(service: Service): Promise<void> {
         throw 'Service already exists at this time'
     }
     services.push(service)
-    
+
     const putObjectCommand = new PutObjectCommand({
         Bucket: SERVICE_DATA_BUCKET,
         Key: "services.json",

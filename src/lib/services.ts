@@ -25,7 +25,7 @@ export function scriptFileMetadata(service: Service, filename: string): File_t {
 
 export function newService(date?: Date): Service {
     if (!date) {
-        const now = new Date();
+        const now = new Date(Date.now() - 2 * HOUR);
         date = new Date(
             Date.UTC(
                 now.getUTCFullYear(),
@@ -35,6 +35,9 @@ export function newService(date?: Date): Service {
         );
         date.setUTCDate(now.getUTCDate() + ((7 - now.getUTCDay()) % 7));
         date.setUTCHours(10, 30, 0, 0);
+        if (date < now) {
+            date.setUTCDate(date.getUTCDate() + 7)
+        }
     }
 
     return {

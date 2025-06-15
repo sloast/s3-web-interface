@@ -40,16 +40,6 @@
     let data_files: File_t[];
     let script_file: File_t | null = null;
 
-    onMount(async () => {
-        // Check if user is already signed in
-        const client = await signIn();
-        setClient(client);
-
-        services = await listServices();
-        current_service = nextService(services);
-        services = [...services];
-    });
-
     async function onSetService(): Promise<void> {
         try {
             data_files = await getServiceFiles(current_service);
@@ -106,6 +96,19 @@
         current_service = nextService(services);
         deleteServiceModal.close();
     }
+
+    new Promise<void>(async (res, _) => {
+        // Check if user is already signed in
+        const client = await signIn();
+        setClient(client);
+
+        console.log("signed in");
+
+        services = await listServices();
+        current_service = nextService(services);
+        services = [...services];
+        res();
+    });
 </script>
 
 <main
