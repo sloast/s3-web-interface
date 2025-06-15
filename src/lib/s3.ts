@@ -206,9 +206,12 @@ export const listServices = async (): Promise<Service[]> => {
         const bodyContents = await streamToString(objectData.Body);
 
         const services: Service[] = JSON.parse(bodyContents);
+
         for (const service of services) {
             service.date = new Date(service.date);
         }
+
+        services.sort((a, b) => { return a.date.getTime() - b.date.getTime() });
 
         return services;
     } catch (err) {
