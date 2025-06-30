@@ -53,15 +53,15 @@ export function nextService(services: Service[]): Service {
     // 2h before current time
     const now = new Date(Date.now() - 2 * HOUR);
 
+    const service = newService()
+    if (!services.some(e => e.prefix === service.prefix)) {
+        addService(service)
+        services.push(service)
+    }
+
     const upcomingServices = services.filter(
         (service) => service.date > now,
     );
-    if (upcomingServices.length === 0) {
-        const service = newService();
-        addService(service)
-        services.push(service)
-        return service;
-    }
     return upcomingServices.reduce((next, service) =>
         service.date < next.date ? service : next,
     );
